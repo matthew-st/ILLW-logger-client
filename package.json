@@ -12,19 +12,23 @@
     "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {
+    "@mui/x-data-grid": "^7.12.0",
     "electron-serve": "^1.3.0",
-    "electron-store": "^8.2.0"
+    "electron-store": "^8.2.0",
+    "material-icons": "^1.13.12",
+    "ws": "^8.18.0"
   },
   "devDependencies": {
     "@emotion/cache": "^11.11.0",
     "@emotion/react": "^11.11.4",
     "@emotion/server": "^11.11.0",
     "@emotion/styled": "^11.11.5",
-    "@mui/icons-material": "^5.15.15",
+    "@mui/icons-material": "^5.16.6",
     "@mui/material": "^5.15.15",
     "@mui/material-nextjs": "^5.15.11",
     "@types/node": "^20.11.16",
     "@types/react": "^18.2.52",
+    "@types/ws": "^8.5.12",
     "electron": "^31.0.1",
     "electron-builder": "^24.13.3",
     "next": "^14.2.4",
