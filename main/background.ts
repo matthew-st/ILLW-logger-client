@@ -39,10 +39,11 @@ if (isProd) {
     })
   })
 
-  ipcMain.on('delete', async (event, arg) => {
-    event.reply('delete', arg)
-  })
-  
+  // These handlers are used to transmit messages browser side, and require no server action.
+  ipcMain.on('delete', async (event, arg) => { event.reply('delete', arg) })
+  ipcMain.on('edit', async (event, arg) => { event.reply('edit', arg) })
+
+
 
   // handleSockets(false, )
 })()
@@ -51,11 +52,11 @@ app.on('window-all-closed', () => {
   app.quit()
 })
 
-function handleSockets(retry = true, token) {
+function handleSockets(retry = true, token, ipc: Electron.WebContents) {
   let ws = new WebSocket('wss://gb0csl.ocld.cc')
 
   ws.on('open', () => {
-    ipcMain.emit('snackbar', {
+    ipc.send('snackbar', {
       message: 'Websocket connection successful',
       severity: 'success'
     })
@@ -71,34 +72,34 @@ function handleSockets(retry = true, token) {
     switch (data.op) {
       case 0:
         if (data.unauthenticated) {
-          ipcMain.emit('snackbar', {
+          return ipc.send('snackbar', {
             message: 'Incorrect token provided. Check settings.',
             severity: 'error',
             icon: 'keyoff'
           })
         }
         if (data.chunk_status[0] == 1) {
-          ipcMain.emit('snackbar', {
+          ipc.send('snackbar', {
             message: `Syncronising ${data.total_amount} QSOs from server.`,
             severity: 'info',
             icon: 'sync'
           })
         }
-        ipcMain.emit('initialise', data)
+        ipc.send('initialise', data)
         break;
     }
   })
 
   ws.on('close', () => {
     if (!retry) {
-      ipcMain.emit('snackbar', {
+      ipc.send('snackbar', {
         message: 'Websocket connection lost. Retrying connection in 5s',
         severity: 'error'
       })
     }
     ws = null
     setTimeout(() => {
-      handleSockets(true, token)
+      handleSockets(true, token, ipc)
     }, 5000)
   })
 }

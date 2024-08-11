@@ -5,7 +5,6 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 export default function DeleteDialog({state, set}) {
-    console.log(state)
     return (
         <React.Fragment>
             <Dialog

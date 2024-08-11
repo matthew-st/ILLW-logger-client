@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { Button, Icon } from '@mui/material';
-import DeleteDialog from './DeleteDialog';
 
 const columns: GridColDef[] = [
 	{
@@ -58,7 +57,6 @@ export default function QSOTable({ data }) {
 								]
 							}
 						}}
-						pageSizeOptions={[5, 10, 15]}
 						disableRowSelectionOnClick
 					/>
 				</div>

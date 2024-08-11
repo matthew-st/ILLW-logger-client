@@ -24,6 +24,7 @@ const handler = {
       callback(...args);
     };
     ipcRenderer.on(channel, subscription);
+    console.log(`Listening on: ${channel}`)
 
     return () => {
       ipcRenderer.removeListener(channel, subscription);
