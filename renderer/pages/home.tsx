@@ -78,7 +78,7 @@ export default function HomePage() {
         <QSOTable data={qsos}></QSOTable>
         <br/>
         <div style={{display: 'flex', flexDirection: 'row', alignContent: 'center', justifyContent: 'space-around'}}>
-        <TextField label="Current operator" onChange={(ev) => setOperator(ev.target.value)}></TextField>
+        <TextField label="Current operator" onChange={(ev) => setOperator(ev.target.value)} value={operator}></TextField>
         <Button onClick={() => {window.ipc.send('edit', null)}}><Icon>add</Icon> Manual log</Button>
         </div>
         <ConfigDialog/>
