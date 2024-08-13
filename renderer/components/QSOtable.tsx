@@ -1,21 +1,20 @@
 import * as React from 'react';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { Button, Icon } from '@mui/material';
-
 const columns: GridColDef[] = [
 	{
 		field: "button",
 		headerName: "",
-		width: 120,
+		width: 168,
 		sortable: false,
 		renderCell: (params) => (
 			<>
 				<Button style={{ minWidth: 32 }} onClick={() => {window.ipc.send('edit', params.row)}}><Icon style={{ minWidth: 32 }}>edit</Icon></Button>
 				<Button style={{ minWidth: 32 }} onClick={() => {window.ipc.send('delete', params.row)}}><Icon style={{ minWidth: 32 }}>delete</Icon></Button>
+				<Button style={{ minWidth: 32 }} onClick={() => {window.ipc.send('notes', params.row)}}><Icon style={{minWidth: 32}}>description</Icon></Button>
 			</>
 		)
 	},
-	{ field: 'id', headerName: 'ID', width: 90 },
 	{
 		field: 'time', headerName: 'Time', width: 200, type: 'dateTime',
 		valueGetter: (value) => new Date(value)
@@ -24,9 +23,6 @@ const columns: GridColDef[] = [
 	{ field: 'band', headerName: 'Band', width: 90 },
 	{
 		field: 'mode', headerName: 'Mode', width: 90,
-		valueGetter: (value, row) => {
-			return row.submode ? row.submode : row.mode;
-		},
 	},
 	{ field: 'rstSent', headerName: 'RST sent', width: 90, type: 'number' },
 	{ field: 'rstRcvd', headerName: 'RST rcvd', width: 90, type: 'number' },

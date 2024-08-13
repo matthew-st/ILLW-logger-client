@@ -2,10 +2,10 @@ import path from 'path'
 import { app, ipcMain } from 'electron'
 import serve from 'electron-serve'
 import { createWindow } from './helpers'
-import FileHandler from './helpers/files'
-import handleSockets from './helpers/websocketClient'
+import FileHandler from './helpers/fileHandler'
 import UDPHandler from './helpers/udpServer'
 import WebsocketClient from './helpers/websocketClient'
+import * as nanoid from 'nanoid'
 const isProd = process.env.NODE_ENV === 'production'
 
 if (isProd) {
@@ -31,22 +31,70 @@ if (isProd) {
     mainWindow.webContents.openDevTools()
   }
   let files = new FileHandler(app)
-  let udp = new UDPHandler(mainWindow.webContents)
-  let ws = new WebsocketClient(files.config.get('authToken'))
+  let ws = new WebsocketClient(files.config, mainWindow.webContents)
+
+  setTimeout(() => {
+    let udp = new UDPHandler(mainWindow.webContents)
+    udp.on('n1mm_qso', (qso) => {
+      qso.add = true
+      mainWindow.webContents.send('edit', qso)
+    })
+  }, 10000)
+  setInterval(() => {
+    // Handle unfulfilled actions
+    if (ws.ws.OPEN) {
+      if (files.actions.get().filter(val => val.fulfilled == false).length > 0) {
+        mainWindow.webContents.send('snackbar', {
+          message: 'Replaying unfulfilled actions',
+          severity: 'info',
+          icon: 'replay'
+        })
+        // Replay unfulfilled actions here, and recieve response from server
+      } 
+    }
+  }, 1000 * 60 * 5)
+
+  // These handlers are used to transmit messages browser side, and require no server action.
+  ipcMain.on('delete', async (event, arg) => { event.reply('delete', arg) })
+  ipcMain.on('edit', async (event, arg) => { event.reply('edit', arg) })
+  ipcMain.on('notes', async (event, arg) => { event.reply('notes', arg) })
+
   ipcMain.on('authToken', async (event, arg) => {
     files.config.set('authToken', arg)
     event.reply('snackbar', {
-      message: 'Websocket authentication key successfully updated and will apply on next start',
+      message: 'Websocket authentication key successfully updated',
       severity: 'success',
       icon: 'key'
     })
   })
 
-  // These handlers are used to transmit messages browser side, and require no server action.
-  ipcMain.on('delete', async (event, arg) => { event.reply('delete', arg) })
-  ipcMain.on('edit', async (event, arg) => { event.reply('edit', arg) })
-
-  ipcMain.on('log_qso', async(event, arg) => {})
+  ipcMain.on('add_qso', async(event, arg) => {
+    files.actions.add({
+      type:'add',
+      qso: arg.qso,
+      opCall: arg.operatorCall,
+      opId: nanoid.nanoid(9)
+    })
+    mainWindow.webContents.send('qso_made', arg.qso)
+  })
+  ipcMain.on('edit_qso', async(event, arg) => {
+    files.actions.add({
+      type: 'edit',
+      qso: arg.qso,
+      opCall: arg.opCall,
+      opId: nanoid.nanoid(9)
+    })
+    mainWindow.webContents.send('qso_edit', arg.qso)
+  })
+  ipcMain.on('delete_qso', async(event, arg) => {
+    files.actions.add({
+      type: 'delete',
+      qso: arg.qso,
+      opCall: arg.opCall,
+      opId: nanoid.nanoid(9)
+    })
+    mainWindow.webContents.send('qso_delete', arg.qso)
+  })
 })()
 
 app.on('window-all-closed', () => {

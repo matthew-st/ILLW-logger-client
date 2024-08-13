@@ -4,7 +4,7 @@ import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
-export default function DeleteDialog({state, set}) {
+export default function DeleteDialog({state, set, op}) {
     return (
         <React.Fragment>
             <Dialog
@@ -14,7 +14,7 @@ export default function DeleteDialog({state, set}) {
                     component: 'form',
                     onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
                         event.preventDefault();
-                        window.ipc.send('deleteConfirmed', state[1])
+                        window.ipc.send('delete_qso', {qso: state[1], opCall: op})
                         set([false, state[1]]);
                     },
                 }}
