@@ -11,6 +11,9 @@ import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment'
 import moment from 'moment';
 import { nanoid } from 'nanoid';
+import {getBandFromMhz} from '../functions/bandFromFreq'
+
+
 export default function EditDialog({ state, set, op }) {
     if (state[1] == null) {
         state[1] = { add: true }
@@ -88,6 +91,7 @@ export default function EditDialog({ state, set, op }) {
                                 value={state[1]?.freq}
                                 onChange={(ev) => {
                                     state[1].freq = ev.target.value
+                                    state[1].band = getBandFromMhz(state[1].freq)
                                     set([state[0], state[1]])
                                 }}
                             />&nbsp;
@@ -99,7 +103,7 @@ export default function EditDialog({ state, set, op }) {
                                 label='Sent'
                                 variant='outlined'
                                 value={state[1]?.rstSent || ''}
-                                style={{ width: '21%' }}
+                                style={{ width: '22%' }}
                                 onChange={(ev) => {
                                     state[1].rstSent = ev.target.value
                                     set([state[0], state[1]])
@@ -117,7 +121,7 @@ export default function EditDialog({ state, set, op }) {
                                     state[1].rstRcvd = ev.target.value
                                     set([state[0], state[1]])
                                 }}
-                                style={{ width: '21%' }}
+                                style={{ width: '22%' }}
                             />
                         </div>
                         <div style={{ display: 'flex', alignContent: 'center', justifyContent: 'center' }}>
@@ -129,7 +133,7 @@ export default function EditDialog({ state, set, op }) {
                                 name='mode'
                                 variant='outlined'
                                 value={state[1]?.mode || ''}
-                                style={{ width: '35.5%' }}
+                                style={{ width: '38.5%' }}
                                 onChange={(ev) => {
                                     state[1].mode = ev.target.value
                                     set([state[0], state[1]])
@@ -148,12 +152,12 @@ export default function EditDialog({ state, set, op }) {
                                 id='band'
                                 name='band'
                                 variant='outlined'
-                                value={state[1]?.band || ''}
+                                value={state[1].band || ''}
                                 onChange={(ev) => {
                                     state[1].band = ev.target.value
                                     set([state[0], state[1]])
                                 }}
-                                style={{ width: '42%' }}
+                                style={{ width: '44%' }}
                             >
                                 <MenuItem value="160m">160m</MenuItem>
                                 <MenuItem value="80m">80m</MenuItem>
@@ -184,7 +188,7 @@ export default function EditDialog({ state, set, op }) {
                                     state[1].notes = ev.target.value
                                     set([state[0], state[1]])
                                 }}
-                                style={{ width: '78.5%' }}
+                                style={{ width: '83.5%' }}
                             />
                         </div>
                     </Stack>

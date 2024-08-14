@@ -5,31 +5,31 @@ export function getBandFromMhz(num) {
     if (!parseFloat(num)) return ""
     num = parseFloat(num)
     switch (num) {
-        case 1.8:
+        case num >= 1.8 && num <= 2:
             return "160m"
-        case 3.5:
+        case num >= 3.5 && num <= 3.8:
             return "80m"
-        case 7:
+        case num >= 7 && num <= 7.2:
             return "40m"
-        case 10:
+        case num >= 10 && num <= 10.15:
             return "30m"
-        case 14:
+        case num >= 14 && num <= 14.35:
             return "20m"
-        case 18:
+        case num >= 18.06 && num <= 18.17:
             return "17m"
-        case 21:
+        case num >= 21 && num <= 21.45:
             return "15m"
-        case 24:
+        case num >= 24.89 && num <= 24.99:
             return "12m"
-        case 28:
+        case num >= 28 && num <= 29.7:
             return "10m"
-        case 50:
+        case num >= 50 && num <= 52:
             return "6m"
-        case 70:
+        case num >= 70 && num <= 70.5:
             return "4m"
-        case 144:
+        case num >= 144 && num <= 147:
             return "2m"
-        case 420:
+        case num >= 420 && num <= 440:
             return "70cm"
     }
 }

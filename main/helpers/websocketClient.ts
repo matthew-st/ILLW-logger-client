@@ -1,6 +1,6 @@
 import { EventEmitter } from 'stream'
 import { WebSocket } from 'ws'
-import { ConfigHandler, QSO } from './fileHandler'
+import { Action, ConfigHandler } from './fileHandler'
 
 export default class WebsocketClient extends EventEmitter {
     ws: WebSocket
@@ -9,6 +9,7 @@ export default class WebsocketClient extends EventEmitter {
     retry: boolean
     lastFailedAuth: string
     lastAuth: string
+    hb: NodeJS.Timeout
     constructor(config: ConfigHandler, ipc: Electron.WebContents) {
         super()
         this.config = config
@@ -18,10 +19,12 @@ export default class WebsocketClient extends EventEmitter {
     }
 
     private createWsClient() {
+        delete this.ws
         if (this.config.get('authToken') == this.lastFailedAuth) {
-            return setTimeout(() => {
+            setTimeout(() => {
                 this.createWsClient()
             }, 5000)
+            return
         }
         this.ws = new WebSocket('ws://localhost:3903')
         this.ws.onerror = () => {
@@ -33,7 +36,7 @@ export default class WebsocketClient extends EventEmitter {
             setTimeout(() => {
                 delete this.ws
                 this.createWsClient() 
-            }, 60 * 1000)
+            }, 60000)
         }
         this.ws.on('open', () => {
             this.ipc.send('snackbar', {
@@ -68,6 +71,9 @@ export default class WebsocketClient extends EventEmitter {
                             icon: 'sync'
                         })
                     }
+                    this.hb = setInterval(() => {
+                        this.sendJson({op: 1000})
+                    }, 10000)
                     this.ipc.send('initialise', data)
                     break;
                 // add QSO
@@ -100,7 +106,8 @@ export default class WebsocketClient extends EventEmitter {
             }
         })
 
-        this.ws.on('close', (closeCode) => {
+        this.ws.on('close', (closeCode, reason) => {
+            console.log(reason.toString())
             if (!this.retry && closeCode !== 3000) {
                 this.ipc.send('snackbar', {
                     message: 'Websocket connection failed. Retrying connection.',
@@ -111,7 +118,8 @@ export default class WebsocketClient extends EventEmitter {
             if (closeCode == 3000) {
                 this.lastFailedAuth = this.lastAuth
             }
-            this.ws = null
+            delete this.ws
+            clearInterval(this.hb)
             setTimeout(() => {
                 this.retry = true
                 this.createWsClient()
@@ -121,27 +129,15 @@ export default class WebsocketClient extends EventEmitter {
     }
 
     sendJson(data: object) {
-        this.ws.send(JSON.stringify(data))
+        if (this.ws?.OPEN) {
+            this.ws.send(JSON.stringify(data))
+        }
     }
 
-    addQSO(data: QSO) {
+    doAction(data: Action) {
         this.sendJson({
             op: 1,
-            qso: data
-        })
-    }
-
-    editQSO(data: QSO) {
-        this.sendJson({
-            op: 2,
-            qso: data
-        })
-    }
-
-    deleteQSO(data: QSO) {
-        this.sendJson({
-            op: 3,
-            id: data.id
+            action: data
         })
     }
 }

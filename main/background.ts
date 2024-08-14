@@ -21,6 +21,7 @@ if (isProd) {
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
     },
+    autoHideMenuBar: true
   })
 
   if (isProd) {
@@ -42,14 +43,17 @@ if (isProd) {
   }, 10000)
   setInterval(() => {
     // Handle unfulfilled actions
-    if (ws.ws.OPEN) {
+    if (ws.ws?.OPEN) {
       if (files.actions.get().filter(val => val.fulfilled == false).length > 0) {
         mainWindow.webContents.send('snackbar', {
           message: 'Replaying unfulfilled actions',
           severity: 'info',
           icon: 'replay'
         })
-        // Replay unfulfilled actions here, and recieve response from server
+        ws.sendJson({
+          op: 2,
+          actions: files.actions.get().filter(val => val.fulfilled == false)
+        })
       } 
     }
   }, 1000 * 60 * 5)
@@ -69,31 +73,37 @@ if (isProd) {
   })
 
   ipcMain.on('add_qso', async(event, arg) => {
-    files.actions.add({
+    let action = {
       type:'add',
       qso: arg.qso,
       opCall: arg.operatorCall,
       opId: nanoid.nanoid(9)
-    })
+    }
+    files.actions.add(action)
     mainWindow.webContents.send('qso_made', arg.qso)
+    ws.doAction(action)
   })
   ipcMain.on('edit_qso', async(event, arg) => {
-    files.actions.add({
+    let action = {
       type: 'edit',
       qso: arg.qso,
       opCall: arg.opCall,
       opId: nanoid.nanoid(9)
-    })
+    }
+    files.actions.add(action)
     mainWindow.webContents.send('qso_edit', arg.qso)
+    ws.doAction(action)
   })
   ipcMain.on('delete_qso', async(event, arg) => {
-    files.actions.add({
+    let action = {
       type: 'delete',
       qso: arg.qso,
       opCall: arg.opCall,
       opId: nanoid.nanoid(9)
-    })
+    }
+    files.actions.add(action)
     mainWindow.webContents.send('qso_delete', arg.qso)
+    ws.doAction(action)
   })
 })()
 
