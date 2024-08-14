@@ -81,7 +81,7 @@ export default function EditDialog({ state, set, op }) {
                                 margin="normal"
                                 id="freq"
                                 name="freq"
-                                label="Frequency (kHz)"
+                                label="Frequency (MHz)"
                                 type="number"
                                 aria-valuemin={0}
                                 variant="outlined"
