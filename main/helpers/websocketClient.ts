@@ -1,18 +1,18 @@
 import { EventEmitter } from 'stream'
 import { WebSocket } from 'ws'
-import { Action, ConfigHandler } from './fileHandler'
+import FileHandler, { Action, ConfigHandler } from './fileHandler'
 
 export default class WebsocketClient extends EventEmitter {
     ws: WebSocket
-    config: ConfigHandler
+    files: FileHandler
     ipc: Electron.WebContents
     retry: boolean
     lastFailedAuth: string
     lastAuth: string
     hb: NodeJS.Timeout
-    constructor(config: ConfigHandler, ipc: Electron.WebContents) {
+    constructor(files: FileHandler, ipc: Electron.WebContents) {
         super()
-        this.config = config
+        this.files = files
         this.ipc = ipc
         this.retry = false
         this.createWsClient()
@@ -20,7 +20,7 @@ export default class WebsocketClient extends EventEmitter {
 
     private createWsClient() {
         delete this.ws
-        if (this.config.get('authToken') == this.lastFailedAuth) {
+        if (this.files.config.get('authToken') == this.lastFailedAuth) {
             setTimeout(() => {
                 this.createWsClient()
             }, 5000)
@@ -45,7 +45,7 @@ export default class WebsocketClient extends EventEmitter {
                 icon: 'tick'
             })
             this.retry = false
-            this.lastAuth = this.config.get('authToken')
+            this.lastAuth = this.files.config.get('authToken')
             this.sendJson({
                 op: 0,
                 token: this.lastAuth
@@ -79,6 +79,7 @@ export default class WebsocketClient extends EventEmitter {
                 // add QSO
                 case 1:
                     this.ipc.send('qso_made', data.qso)
+                    this.files.actions.actionFulfilled(data.opId)
                     this.ipc.send('snackbar', {
                         message: 'QSO added',
                         severity: 'success',
@@ -88,6 +89,7 @@ export default class WebsocketClient extends EventEmitter {
                 // edit QSO
                 case 2:
                     this.ipc.send('qso_edit', data.qso)
+                    this.files.actions.actionFulfilled(data.opId)
                     this.ipc.send('snackbar', {
                         message: 'QSO edited',
                         severity: 'info',
@@ -97,6 +99,7 @@ export default class WebsocketClient extends EventEmitter {
                 // delete QSO
                 case 3:
                     this.ipc.send('qso_delete', data.id)
+                    this.files.actions.actionFulfilled(data.opId)
                     this.ipc.send('snackbar', {
                         message: 'QSO deleted',
                         severity: 'error',

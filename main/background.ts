@@ -32,7 +32,7 @@ if (isProd) {
     mainWindow.webContents.openDevTools()
   }
   let files = new FileHandler(app)
-  let ws = new WebsocketClient(files.config, mainWindow.webContents)
+  let ws = new WebsocketClient(files, mainWindow.webContents)
 
   setTimeout(() => {
     let udp = new UDPHandler(mainWindow.webContents)
