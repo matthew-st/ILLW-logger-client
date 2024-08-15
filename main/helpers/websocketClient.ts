@@ -10,7 +10,6 @@ export default class WebsocketClient extends EventEmitter {
     retryTimeout: NodeJS.Timeout
     lastFailedAuth: string
     lastAuth: string
-    hb: NodeJS.Timeout
     constructor(files: FileHandler, ipc: Electron.WebContents) {
         super()
         this.files = files
@@ -20,6 +19,7 @@ export default class WebsocketClient extends EventEmitter {
     }
 
     private createWsClient() {
+        this.ws?.close()
         clearTimeout(this.retryTimeout)
         delete this.ws
         if (this.files.config.get('authToken') == this.lastFailedAuth) {
@@ -28,17 +28,17 @@ export default class WebsocketClient extends EventEmitter {
             }, 5000)
             return
         }
-        console.log(this.files.config.get('wsUrl'))
         this.ws = new WebSocket(this.files.config.get('wsUrl') || 'ws://localhost:3903')
-        this.ws.onerror = () => {
+        this.ws.onerror = (err) => {
             this.ipc?.send('snackbar', {
                 message: 'Websocket connection failed. Retrying connection.',
                 severity: 'error',
                 icon: 'wifiOff'
             })
+            this.retry = true
             this.retryTimeout = setTimeout(() => {
                 delete this.ws
-                this.createWsClient() 
+                if (this.retry) this.createWsClient() 
             }, 60000)
         }
         this.ws.on('open', () => {
@@ -61,12 +61,14 @@ export default class WebsocketClient extends EventEmitter {
                 // Authentication packet
                 case 0:
                     if (data.unauthenticated) {
+                        this.lastFailedAuth = this.lastAuth
                         return this.ipc.send('snackbar', {
                             message: 'Incorrect token provided. Check settings.',
                             severity: 'error',
                             icon: 'keyoff'
                         })
                     }
+                    clearTimeout(this.retryTimeout)
                     if (data.chunk_status[0] == 1) {
                         this.ipc.send('snackbar', {
                             message: `Syncronising ${data.total_amount} QSOs from server.`,
@@ -74,9 +76,6 @@ export default class WebsocketClient extends EventEmitter {
                             icon: 'sync'
                         })
                     }
-                    this.hb = setInterval(() => {
-                        this.sendJson({op: 1000})
-                    }, 10000)
                     this.ipc.send('init', data)
                     break;
                 // add QSO
@@ -135,15 +134,11 @@ export default class WebsocketClient extends EventEmitter {
                     icon:'wifiOff'
                 })
             } 
-            if (closeCode == 3000) {
-                this.lastFailedAuth = this.lastAuth
-            }
             delete this.ws
-            clearInterval(this.hb)
             this.retryTimeout = setTimeout(() => {
                 this.retry = true
                 this.createWsClient()
-            }, 5000)
+            }, 10000)
         })
 
     }
