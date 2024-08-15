@@ -17,7 +17,7 @@ const columns: GridColDef[] = [
 	},
 	{
 		field: 'time', headerName: 'Time', width: 200, type: 'dateTime',
-		valueGetter: (value) => new Date(value)
+		valueGetter: (value: string) => new Date(parseInt(value))
 	},
 	{ field: 'call', headerName: 'Callsign', width: 130 },
 	{ field: 'band', headerName: 'Band', width: 90 },

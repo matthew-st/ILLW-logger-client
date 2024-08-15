@@ -76,7 +76,7 @@ export default class WebsocketClient extends EventEmitter {
                     this.hb = setInterval(() => {
                         this.sendJson({op: 1000})
                     }, 10000)
-                    this.ipc.send('initialise', data)
+                    this.ipc.send('init', data)
                     break;
                 // add QSO
                 case 1:

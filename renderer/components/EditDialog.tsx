@@ -70,7 +70,7 @@ export default function EditDialog({ state, set, op }) {
                                     <DateTimePicker
                                         name="time"
                                         label="Date time"
-                                        value={moment(state[1]?.time || Date.now())}
+                                        value={moment(parseInt(state[1]?.time) || Date.now())}
                                         onChange={(ev) => {
                                             state[1].time = new Date(ev.valueOf()).getTime()
                                             set([state[0], state[1]])
