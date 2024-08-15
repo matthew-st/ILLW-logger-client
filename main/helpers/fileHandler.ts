@@ -80,8 +80,10 @@ export class ActionHandler {
     }
 
     actionFulfilled(actionId: string) {
+        console.log(actionId)
         let actions = this._allActions()
-        let idx = actions.findIndex((val) => {val.opId == actionId})
+        let idx = actions.findIndex((val) => val.opId == actionId)
+        console.log(idx)
         if (idx == -1) { return }
         actions[idx].fulfilled = true
         this.set(actions)
@@ -89,7 +91,7 @@ export class ActionHandler {
 
     actionUnfulfillable(actionId: string) {
         let actions = this._allActions()
-        let idx = actions.findIndex((val) => {val.opId == actionId})
+        let idx = actions.findIndex((val) => val.opId == actionId)
         if (idx == -1) { return }
         actions[idx].unfulfillable = true
         this.set(actions)

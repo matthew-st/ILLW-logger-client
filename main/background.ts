@@ -56,7 +56,7 @@ if (isProd) {
         })
       } 
     }
-  }, 1000 * 60 * 5)
+  }, 1000 * 60)
 
   // These handlers are used to transmit messages browser side, and require no server action.
   ipcMain.on('delete', async (event, arg) => { event.reply('delete', arg) })
