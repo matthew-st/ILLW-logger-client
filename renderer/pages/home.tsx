@@ -33,8 +33,9 @@ export default function HomePage() {
       setQSOs((qso_arr) => {
         let idx = qso_arr.findIndex((qso) => qso.id == new_qso.id)
         if (idx !== -1) {
-          qso_arr[idx] = new_qso
-          return qso_arr
+          let new_qso_arr = Array.from(qso_arr)
+          new_qso_arr[idx] = new_qso
+          return new_qso_arr
         }
         return [
           ...qso_arr,
@@ -62,7 +63,6 @@ export default function HomePage() {
       setQSOs((qso_arr) => {
         let idx = qso_arr.findIndex((qso) => qso.id == del_qso.id)
         let new_qso_arr = Array.from(qso_arr)
-        console.log(qso_arr, idx)
         if (idx !== -1) {
           new_qso_arr.splice(idx, 1)
         }

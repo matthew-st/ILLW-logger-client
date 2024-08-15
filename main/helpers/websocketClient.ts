@@ -7,6 +7,7 @@ export default class WebsocketClient extends EventEmitter {
     files: FileHandler
     ipc: Electron.WebContents
     retry: boolean
+    retryTimeout: NodeJS.Timeout
     lastFailedAuth: string
     lastAuth: string
     hb: NodeJS.Timeout
@@ -19,9 +20,10 @@ export default class WebsocketClient extends EventEmitter {
     }
 
     private createWsClient() {
+        clearTimeout(this.retryTimeout)
         delete this.ws
         if (this.files.config.get('authToken') == this.lastFailedAuth) {
-            setTimeout(() => {
+            this.retryTimeout = setTimeout(() => {
                 this.createWsClient()
             }, 5000)
             return
@@ -33,7 +35,7 @@ export default class WebsocketClient extends EventEmitter {
                 severity: 'error',
                 icon: 'wifiOff'
             })
-            setTimeout(() => {
+            this.retryTimeout = setTimeout(() => {
                 delete this.ws
                 this.createWsClient() 
             }, 60000)
@@ -124,7 +126,7 @@ export default class WebsocketClient extends EventEmitter {
         })
 
         this.ws.on('close', (closeCode, reason) => {
-            console.log(reason.toString())
+            console.log('Closing for:', reason.toString())
             if (!this.retry && closeCode !== 3000) {
                 this.ipc.send('snackbar', {
                     message: 'Websocket connection failed. Retrying connection.',
@@ -137,7 +139,7 @@ export default class WebsocketClient extends EventEmitter {
             }
             delete this.ws
             clearInterval(this.hb)
-            setTimeout(() => {
+            this.retryTimeout = setTimeout(() => {
                 this.retry = true
                 this.createWsClient()
             }, 5000)
