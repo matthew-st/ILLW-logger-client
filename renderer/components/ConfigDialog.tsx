@@ -31,20 +31,29 @@ export default function ConfigDialog() {
                         event.preventDefault();
                         const formData = new FormData(event.currentTarget);
                         const formJson = Object.fromEntries((formData as any).entries());
-                        window.ipc.send('authToken', formJson.authToken)
+                        window.ipc.send('config', formJson)
                         handleClose();
                     },
                 }}
             >
                 <DialogContent>
                     <TextField
-                        autoFocus
+                        required
+                        margin="dense"
+                        id="token"
+                        name="wsUrl"
+                        label="Websocket URL"
+                        type="text"
+                        fullWidth
+                        variant="standard"
+                    />
+                    <TextField
                         required
                         margin="dense"
                         id="token"
                         name="authToken"
                         label="Authentication token"
-                        type="text"
+                        type="password"
                         fullWidth
                         variant="standard"
                     />

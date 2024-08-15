@@ -63,10 +63,11 @@ if (isProd) {
   ipcMain.on('edit', async (event, arg) => { event.reply('edit', arg) })
   ipcMain.on('notes', async (event, arg) => { event.reply('notes', arg) })
 
-  ipcMain.on('authToken', async (event, arg) => {
-    files.config.set('authToken', arg)
+  ipcMain.on('config', async (event, arg) => {
+    if (arg.authToken) files.config.set('authToken', arg.authToken)
+    if (arg.wsUrl) files.config.set('wsUrl', arg.wsUrl)
     event.reply('snackbar', {
-      message: 'Websocket authentication key successfully updated',
+      message: 'Websocket parameters successfully updated',
       severity: 'success',
       icon: 'key'
     })

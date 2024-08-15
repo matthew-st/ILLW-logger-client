@@ -28,7 +28,8 @@ export default class WebsocketClient extends EventEmitter {
             }, 5000)
             return
         }
-        this.ws = new WebSocket('ws://localhost:3903')
+        console.log(this.files.config.get('wsUrl'))
+        this.ws = new WebSocket(this.files.config.get('wsUrl') || 'ws://localhost:3903')
         this.ws.onerror = () => {
             this.ipc?.send('snackbar', {
                 message: 'Websocket connection failed. Retrying connection.',
