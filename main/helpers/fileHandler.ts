@@ -80,10 +80,8 @@ export class ActionHandler {
     }
 
     actionFulfilled(actionId: string) {
-        console.log(actionId)
         let actions = this._allActions()
         let idx = actions.findIndex((val) => val.opId == actionId)
-        console.log(idx)
         if (idx == -1) { return }
         actions[idx].fulfilled = true
         this.set(actions)
