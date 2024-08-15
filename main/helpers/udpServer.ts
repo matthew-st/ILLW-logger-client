@@ -82,24 +82,3 @@ export default class UDPHandler extends EventEmitter {
         this.udpServer.bind(41234, '0.0.0.0')
     }
 }
-
-/*
-let QSOs = []
-// UDP Server
-UDPServer.on('error', (err) => {
-    console.error(`UDPServer error:\n${err.stack}`);
-    UDPServer.close();
-});
-UDPServer.on('message', (msg, rinfo) => {
-    QSOs.push(msg.toString())
-    if (QSOs.length > 5) {
-        console.log(`Added a QSO to the list - URGENT: The amount of QSOs being stored is currently ${QSOs.length}. This is abnormal. Check if it is turned on in the browser.`)
-    } else {
-        console.log(`Added a QSO to the list. ${QSOs.length} waiting for pickup.`)
-    }
-});
-UDPServer.on('listening', () => {
-    const address = UDPServer.address();
-    console.log(`UDP Server listening ${address.address}:${address.port}`);
-});
-UDPServer.bind(41234, "127.0.0.1");*/
