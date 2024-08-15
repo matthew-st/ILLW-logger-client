@@ -44,7 +44,7 @@ if (isProd) {
   setInterval(() => {
     // Handle unfulfilled actions
     if (ws.ws?.OPEN) {
-      if (files.actions.get().filter(val => val.fulfilled == false).length > 0) {
+      if (files.actions.get().filter(val => val.fulfilled == false && !val.unfulfillable).length > 0) {
         mainWindow.webContents.send('snackbar', {
           message: 'Replaying unfulfilled actions',
           severity: 'info',
@@ -52,7 +52,7 @@ if (isProd) {
         })
         ws.sendJson({
           op: 2,
-          actions: files.actions.get().filter(val => val.fulfilled == false)
+          actions: files.actions.get().filter(val => val.fulfilled == false && !val.unfulfillable)
         })
       } 
     }

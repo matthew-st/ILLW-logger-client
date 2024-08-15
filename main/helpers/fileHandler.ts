@@ -4,9 +4,9 @@ import { join } from "path";
 
 export interface QSO {
     id?: number
-    call: String,
-    freq: number,
-    band: String,
+    call: String
+    freq: number
+    band: String
     mode: String
     time: number
     notes?: String
@@ -17,11 +17,12 @@ export interface QSO {
 }
 
 export interface Action {
-    type: string,
-    qso: QSO,
-    opCall: string,
-    opId: string,
+    type: string
+    qso: QSO
+    opCall: string
+    opId: string
     fulfilled?: boolean
+    unfulfillable?: boolean
 }
 
 export default class FileHandler {
@@ -83,6 +84,14 @@ export class ActionHandler {
         let idx = actions.findIndex((val) => {val.opId == actionId})
         if (idx == -1) { return }
         actions[idx].fulfilled = true
+        this.set(actions)
+    }
+
+    actionUnfulfillable(actionId: string) {
+        let actions = this._allActions()
+        let idx = actions.findIndex((val) => {val.opId == actionId})
+        if (idx == -1) { return }
+        actions[idx].unfulfillable = true
         this.set(actions)
     }
 

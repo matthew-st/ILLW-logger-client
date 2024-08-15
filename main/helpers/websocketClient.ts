@@ -1,6 +1,6 @@
 import { EventEmitter } from 'stream'
 import { WebSocket } from 'ws'
-import FileHandler, { Action, ConfigHandler } from './fileHandler'
+import FileHandler, { Action } from './fileHandler'
 
 export default class WebsocketClient extends EventEmitter {
     ws: WebSocket
@@ -80,7 +80,7 @@ export default class WebsocketClient extends EventEmitter {
                 case 1:
                     this.ipc.send('qso_made', data.qso)
                     this.files.actions.actionFulfilled(data.opId)
-                    this.ipc.send('snackbar', {
+                    if(!data.replay) this.ipc.send('snackbar', {
                         message: 'QSO added',
                         severity: 'success',
                         icon: 'add'
@@ -90,7 +90,7 @@ export default class WebsocketClient extends EventEmitter {
                 case 2:
                     this.ipc.send('qso_edit', data.qso)
                     this.files.actions.actionFulfilled(data.opId)
-                    this.ipc.send('snackbar', {
+                    if(!data.replay) this.ipc.send('snackbar', {
                         message: 'QSO edited',
                         severity: 'info',
                         icon: 'edit'
@@ -100,12 +100,26 @@ export default class WebsocketClient extends EventEmitter {
                 case 3:
                     this.ipc.send('qso_delete', data.id)
                     this.files.actions.actionFulfilled(data.opId)
-                    this.ipc.send('snackbar', {
+                    if(!data.replay) this.ipc.send('snackbar', {
                         message: 'QSO deleted',
                         severity: 'error',
                         icon: 'delete'
                     })
                     break;
+                // Finished fulfilling actions
+                case 4:
+                    this.ipc.send('snackbar', {
+                        message: `A batch of ${data.number} unfulfilled action${data.number == 1 ? '' : 's'} were handled.`,
+                        severity: 'success',
+                        icon: 'tick'
+                    })
+                    break;
+                case 5:
+                    this.ipc.send('snackbar', {
+                        message: 'One of your actions have been marked as unfulfillable. Please tell someone.',
+                        severity: 'error',
+                        icon: 'error'
+                    })
             }
         })
 
